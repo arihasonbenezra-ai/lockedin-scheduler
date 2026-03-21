@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Locked In — Interview Scheduler</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#4ECDC4;--teal2:#38B8AF;--teal-light:#E8F8F7;--teal-mid:#A8E6E3;
+  --navy:#1A0066;--navy2:#250088;
+  --bg:#F6F7F5;--card:#FFFFFF;--surface:#EBF0EB;
+  --border:#DDE3DD;--border2:#C8D0C8;
+  --text:#3D4042;--muted:#6B7280;--dim:#9CA3AF;
+  --green:#059669;--green-light:#ECFDF5;--green-mid:#6EE7B7;
+  --amber:#D97706;--amber-light:#FFFBEB;
+  --red:#DC2626;--red-light:#FEF2F2;
+}
+html{scroll-behavior:smooth}
+body{min-height:100vh;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+
+/* HEADER */
+.hdr{background:var(--card);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+.logo-name{font-size:17px;font-weight:700;color:var(--text)}
+.logo-sub{font-size:11px;color:var(--dim);margin-top:1px}
+
+/* PERSONA TOGGLE */
+.toggle{display:flex;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:3px;margin:20px 32px 0}
+.toggle-btn{flex:1;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;border:none;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px}
+.toggle-btn.active{background:var(--card);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08),0 0 0 1px var(--border)}
+.q-badge{background:var(--amber);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+
+/* COORD TABS */
+.ctabs{display:flex;border-bottom:1px solid var(--border);margin:16px 32px 0;padding:0}
+.ctab{padding:10px 18px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:'Inter',sans-serif;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.ctab:hover{color:var(--text)}
+.ctab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:600}
+
+/* MAIN */
+.main{max-width:860px;margin:0 auto;padding:24px 32px 80px}
+
+/* STEP BAR */
+.sbar{display:flex;align-items:center;margin-bottom:8px}
+.sitm{display:flex;align-items:center;flex:1}
+.sdot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;transition:all .25s;border:2px solid var(--border2);background:var(--card);color:var(--dim)}
+.sdot.active{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:0 0 0 4px var(--teal-light)}
+.sdot.done{background:var(--green);border-color:var(--green);color:#fff}
+.sline{flex:1;height:1px;background:var(--border);margin:0 8px;transition:background .25s}
+.sline.done{background:var(--green)}
+.slbls{display:flex;justify-content:space-between;margin-bottom:24px}
+.slbl{font-size:11px;font-weight:500;color:var(--dim);text-align:center;flex:1}
+.slbl.active{color:var(--navy);font-weight:600}
+.slbl.done{color:var(--green)}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.card-hd{padding:18px 24px 16px;border-bottom:1px solid var(--border);border-top:3px solid var(--navy)}
+.card-title{font-size:15px;font-weight:600;color:var(--text)}
+.card-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.card-body{padding:24px}
+.card-ft{padding:14px 24px;border-top:1px solid var(--border);background:var(--surface);display:flex;justify-content:space-between;align-items:center}
+
+/* FORM */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.full{grid-column:1/-1}
+label{font-size:12px;font-weight:500;color:var(--muted)}
+.req{color:var(--navy)}
+input,select,textarea{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-light);background:#fff}
+input[type="file"]{padding:7px 12px;font-size:13px;color:var(--muted)}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+textarea{resize:vertical;min-height:100px;line-height:1.6}
+.hint{font-size:11px;color:var(--dim);margin-top:3px}
+
+/* BUTTONS */
+.btn{padding:9px 20px;border-radius:8px;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;border:none;display:inline-flex;align-items:center;gap:6px}
+.btn-navy{background:var(--navy);color:#fff}.btn-navy:hover{background:var(--navy2)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);background:var(--surface)}
+.btn-teal{background:var(--teal);color:#1A0066;font-weight:600}.btn-teal:hover{background:var(--teal2)}
+.btn-danger{background:transparent;color:var(--red);border:1px solid var(--red-light)}.btn-danger:hover{background:var(--red-light)}
+.btn-outline{background:transparent;color:var(--navy);border:1.5px solid var(--navy)}.btn-outline:hover{background:var(--teal-light)}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* INTERVIEW BUILDER */
+.int-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.int-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.int-hd{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;background:var(--card);border-bottom:1px solid var(--border)}
+.int-num{width:24px;height:24px;background:var(--navy);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.int-body{padding:16px;display:none}
+.int-body.open{display:block}
+.add-btn{width:100%;padding:12px;background:transparent;border:1.5px dashed var(--border2);border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+.add-btn:hover{border-color:var(--navy);color:var(--navy);background:var(--surface)}
+
+/* AVAILABILITY */
+.avail-parsed{margin-top:12px;padding:14px;background:var(--green-light);border:1px solid var(--green-mid);border-radius:8px}
+.aslots{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.aslot{background:#fff;border:1px solid var(--green-mid);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;color:var(--green);cursor:pointer;transition:all .15s}
+.aslot:hover,.aslot.on{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* REVIEW */
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.ri{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.ri-lbl{font-size:11px;color:var(--dim);margin-bottom:3px}
+.ri-val{font-size:13px;font-weight:500;color:var(--text)}
+.rv-int{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11px;font-weight:500;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:20px;padding:3px 10px}
+
+/* QUEUE */
+.qhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.fwrap{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:3px}
+.fbtn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .15s}
+.fbtn.on{background:var(--navy);color:#fff}
+.fbtn:hover:not(.on){background:var(--bg);color:var(--text)}
+.empty{text-align:center;padding:64px 20px;background:var(--card);border:1px solid var(--border);border-radius:12px}
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:8px}
+.tcard:hover{border-color:var(--teal-mid);box-shadow:0 4px 12px rgba(0,0,0,.06);transform:translateY(-1px)}
+.bp{background:var(--amber-light);color:var(--amber);font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px}
+.bs{background:var(--green-light);color:var(--green);font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px}
+
+/* TICKET DETAIL */
+.dsec{margin-bottom:24px}
+.dtitle{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.di{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.di-lbl{font-size:11px;color:var(--dim);margin-bottom:3px}
+.di-val{font-size:13px;font-weight:500;color:var(--text)}
+.araw{background:var(--amber-light);border:1px solid #FDE68A;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--amber);line-height:1.7}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.sopt{background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;cursor:pointer;transition:all .15s}
+.sopt:hover{border-color:var(--teal-mid);background:var(--teal-light)}
+.sopt.on{border-color:var(--green);background:var(--green-light)}
+.isb{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.isb-hd{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+.isb-num{width:22px;height:22px;background:var(--navy);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.isb-body{padding:14px 16px}
+.isb-sel{display:inline-flex;align-items:center;gap:6px;background:var(--green-light);border:1px solid var(--green-mid);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;color:var(--green);margin-top:8px}
+
+/* CAL PREVIEWS */
+.cpreviews{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+.cpw{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+.cpl{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.cinv{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.cinv-hd{background:var(--navy);padding:12px 14px}
+.cinv-title{font-size:13px;font-weight:600;color:#fff}
+.cinv-time{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px}
+.cinv-body{padding:12px 14px}
+.crow{display:flex;align-items:flex-start;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px}
+.crow:last-child{border:none}
+.ckey{color:var(--dim);font-weight:500;min-width:68px;flex-shrink:0}
+.achips{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.achip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2px 8px;font-size:11px;color:var(--muted)}
+
+/* EMAIL MODAL */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.mbox{background:#fff;border-radius:12px;width:100%;max-width:580px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.mhd{background:var(--navy);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.mclose{background:transparent;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;line-height:1;padding:0}
+.mclose:hover{color:#fff}
+.mbody{overflow-y:auto;flex:1}
+.ep-outer{background:#f3f4f6;padding:20px;font-family:'Inter',sans-serif}
+.ep-card{background:#fff;border-radius:8px;overflow:hidden;max-width:520px;margin:0 auto;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.ep-hd{background:var(--navy);padding:16px 22px}
+.ep-mark{width:28px;height:28px;background:var(--teal);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#1A0066;flex-shrink:0}
+.ep-body{padding:20px 22px}
+.ep-greeting{font-size:14px;font-weight:600;margin-bottom:12px}
+.ep-para{font-size:13px;color:#374151;line-height:1.65;margin-bottom:14px}
+.ep-stitle{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--teal2);margin-bottom:8px;margin-top:16px}
+.ep-ul{margin:0;padding:0 0 0 16px;color:#374151;font-size:13px;line-height:1.9}
+.ep-lnk{background:var(--teal-light);border-radius:6px;padding:10px 14px;margin:14px 0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ep-btn{font-size:11px;font-weight:600;background:var(--navy);color:#fff;border:none;padding:6px 12px;cursor:pointer;border-radius:6px;text-decoration:none}
+.ep-div{border:none;border-top:1px solid #E5E7EB;margin:16px 0}
+.ep-sign{font-size:12px;color:#6B7280;line-height:1.7}
+.ep-ft{background:#1F2937;padding:12px 22px;text-align:center}
+.ep-ft-txt{font-size:10px;color:#6B7280;letter-spacing:.06em;text-transform:uppercase}
+
+/* DASHBOARD */
+.dhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.dcard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:8px;display:flex;align-items:flex-start;gap:14px}
+.dcard:hover{box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.ddate{min-width:48px;text-align:center;background:var(--teal-light);border-radius:8px;padding:7px 6px;flex-shrink:0}
+.ddate-mon{font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em}
+.ddate-day{font-size:22px;font-weight:700;color:var(--navy);line-height:1.1}
+.chip-v{background:#EEF2FF;border-color:#C7D2FE;color:#4338CA}
+.chip-p{background:var(--green-light);border-color:var(--green-mid);color:var(--green)}
+.chip-o{background:var(--amber-light);border-color:#FDE68A;color:var(--amber)}
+
+/* REPORTS */
+.rtoolbar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:16px}
+.rtoolbar-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px}
+.rrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.rlbl{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;min-width:72px}
+.rpills{display:flex;gap:5px;flex-wrap:wrap}
+.rpill{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);transition:all .15s}
+.rpill.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.rpill:hover:not(.on){border-color:var(--teal-mid);color:var(--navy)}
+.rpreview{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px}
+.rpt-hd{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.rpt-title{font-size:20px;font-weight:700;color:var(--text)}
+.rpt-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.rpt-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.rpt-stat{background:var(--teal-light);border:1px solid var(--teal-mid);border-radius:10px;padding:16px;text-align:center}
+.rpt-stat-num{font-size:30px;font-weight:700;color:var(--navy);line-height:1}
+.rpt-stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.04em}
+.rsec{margin-bottom:20px}
+.rsec-title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.rbar-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;gap:10px}
+.rbar-row:last-child{border:none}
+.rbar-lbl{color:var(--text);min-width:120px}
+.rbar-wrap{flex:1;height:5px;background:var(--border);border-radius:10px;overflow:hidden}
+.rbar{height:100%;background:var(--teal);border-radius:10px}
+.rbar-val{font-weight:600;color:var(--navy);min-width:24px;text-align:right}
+
+.hidden{display:none!important}
+@media(max-width:640px){
+  .hdr,.toggle,.ctabs{padding:0 16px}
+  .main{padding:16px 16px 80px}
+  .fgrid,.rgrid,.dgrid,.cpreviews,.sgrid,.rpt-stats{grid-template-columns:1fr}
+  .card-ft{flex-direction:column;gap:8px}
+}
+
+/* Login Screen */
+#loginScreen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:24px}
+#loginScreen.hidden{display:none}
+#appShell.hidden{display:none}
+.login-card{background:#fff;border-radius:16px;padding:40px 48px;text-align:center;max-width:400px;width:90%}
+.login-logo{width:48px;height:48px;background:var(--navy);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.login-title{font-size:24px;font-weight:700;color:var(--text);margin-bottom:8px}
+.login-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 20px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s}
+.btn-google:hover{border-color:var(--navy);background:var(--surface)}
+.btn-google svg{width:18px;height:18px;flex-shrink:0}
+/* User info in nav */
+.user-pill{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;background:rgba(255,255,255,.1);border-radius:20px;cursor:pointer}
+.user-avatar{width:26px;height:26px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--navy)}
+.user-name{font-size:12px;color:rgba(255,255,255,.8)}
+</style>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, onSnapshot, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAz81S8YLLEpMWPKHl_JnxQp9zI2Q1a2Bs",
+    authDomain: "aribenezra.com",
+    projectId: "lockedin-scheduler",
+    storageBucket: "lockedin-scheduler.firebasestorage.app",
+    messagingSenderId: "760676652543",
+    appId: "1:760676652543:web:9aa8b14a8356f198e483ca"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  // Expose to global scope for use in the main script
+  window._fb = { auth, db, provider, signInWithRedirect, signOut, onAuthStateChanged, collection, addDoc, getDocs, onSnapshot, doc, updateDoc, query, orderBy };
+
+  // Handle redirect result on page load
+  getRedirectResult(auth).catch(function(err) {
+    if (err) console.error('Redirect sign-in error:', err.message);
+  });
+
+  // Auth state listener
+  onAuthStateChanged(auth, function(user) {
+    if (user) {
+      window._fbUser = user;
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('appShell').classList.remove('hidden');
+      document.getElementById('userAvatar').textContent = user.displayName ? user.displayName[0].toUpperCase() : 'U';
+      document.getElementById('userName').textContent = user.displayName || user.email;
+      // Load queue from Firestore
+      window.loadQueueFromFirestore();
+    } else {
+      window._fbUser = null;
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('appShell').classList.add('hidden');
+    }
+  });
+</script>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12L9 17L20 6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="login-title">Locked In.</div>
+    <div class="login-sub">Interview scheduling for TA teams.<br/>Sign in to access your team's workspace.</div>
+    <button class="btn-google" onclick="window.signInWithGoogle()">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Sign in with Google
+    </button>
+  </div>
+</div>
+
+<!-- App Shell -->
+<div id="appShell" class="hidden">
+
+<div class="hdr">
+  <div class="logo">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect width="36" height="36" rx="9" fill="var(--navy)"/>
+      <path d="M10 18.5L15.5 24L26 13" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div><div class="logo-name">Locked In.</div><div class="logo-sub">Interview Scheduler</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="user-pill" onclick="window.doSignOut()">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <span class="user-name" id="userName"></span>
+    </div>
+    <button onclick="window.doSignOut()" style="font-size:11px;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;padding:4px 8px">Sign out</button>
+  </div>
+  <div style="font-size:11px;color:var(--dim);font-style:italic">Scheduling, Reimagined</div>
+</div>
+
+<div class="toggle">
+  <button class="toggle-btn active" id="btnRec" onclick="switchP('rec')">Recruiter</button>
+  <button class="toggle-btn" id="btnCoord" onclick="switchP('coord')">
+    Coordinator <span class="q-badge" id="qBadge" style="display:none">0</span>
+  </button>
+</div>
+
+<div class="ctabs hidden" id="coordTabs">
+  <button class="ctab active" id="tabQueue" onclick="switchTab('queue')">Queue</button>
+  <button class="ctab" id="tabDash" onclick="switchTab('dash')">Dashboard</button>
+  <button class="ctab" id="tabRpt" onclick="switchTab('rpt')">Reports</button>
+  <button class="ctab" id="tabHist" onclick="switchTab('hist')">Historic</button>
+  <button class="ctab" id="tabSettings" onclick="switchTab('settings')">⚙ Settings</button>
+</div>
+
+<!-- ══ RECRUITER ══ -->
+<div id="recView" class="main">
+  <div class="sbar" id="recBar">
+    <div class="sitm"><div class="sdot active" id="rd1">1</div><div class="sline" id="rl1"></div></div>
+    <div class="sitm"><div class="sdot" id="rd2">2</div><div class="sline" id="rl2"></div></div>
+    <div class="sitm"><div class="sdot" id="rd3">3</div></div>
+  </div>
+  <div class="slbls" id="recLbls">
+    <div class="slbl active" id="rlb1">Candidate & Availability</div>
+    <div class="slbl" id="rlb2">Build Interviews</div>
+    <div class="slbl" id="rlb3">Review & Submit</div>
+  </div>
+
+  <!-- Step 1 -->
+  <div id="rS1">
+    <div class="card">
+      <div class="card-hd"><div class="card-title">Candidate & Availability</div><div class="card-sub">Enter candidate details and paste their availability</div></div>
+      <div class="card-body">
+        <div class="fgrid">
+          <div class="fg"><label>Job ID <span class="req">*</span></label><input type="text" id="jobId" placeholder="JOB-001"/></div>
+          <div class="fg"><label>Recruiter <span class="req">*</span></label><input type="text" id="recName" placeholder="Type to search or enter name..." list="recList" autocomplete="off"/><datalist id="recList"><option value="Add your team here"></datalist><div class="hint">Type to search or enter any name</div></div>
+          <div class="fg"><label>Candidate Full Name <span class="req">*</span></label><input type="text" id="candName" placeholder="First Last"/></div>
+          <div class="fg"><label>Candidate Email <span class="req">*</span></label><input type="email" id="candEmail" placeholder="candidate@email.com"/></div>
+          <div class="fg"><label>Job Title <span class="req">*</span></label><input type="text" id="jobTitle" placeholder="Senior Product Manager"/></div>
+
+          <div class="fg"><label>Candidate Phone</label><input type="tel" id="candPhone" placeholder="+1 (000) 000-0000"/></div>
+          <div class="fg"><label>Resume <span class="req">*</span></label><input type="file" id="resume" accept=".pdf,.doc,.docx"/></div>
+          <div class="fg full"><label>Candidate Availability <span class="req">*</span></label>
+            <textarea id="availRaw" style="min-height:110px" oninput="parseAvail()" placeholder="Paste candidate availability from email...&#10;&#10;e.g. 'I'm free Monday March 17 from 10am-2pm, Tuesday March 18 after 1pm, or Wednesday morning.'"></textarea>
+            <div class="hint">Paste their email text — we'll extract time slots for the coordinator</div>
+          </div>
+        </div>
+        <div id="availRes" class="hidden">
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 14px;background:var(--green-light);border:1px solid var(--green-mid);border-radius:8px">
+            <span style="font-size:16px">✓</span>
+            <span id="parsedCount" style="font-size:13px;font-weight:500;color:var(--green)">Time slots detected</span>
+          </div>
+          <div class="aslots hidden" id="parsedSlots"></div>
+        </div>
+
+      </div>
+      <div class="card-ft"><div style="font-size:12px;color:var(--dim)">Step 1 of 3</div><button class="btn btn-navy" onclick="rGo(2)">Next: Build Interviews →</button></div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div id="rS2" class="hidden">
+    <div class="card">
+      <div class="card-hd"><div class="card-title">Build Interviews</div><div class="card-sub">Add one or more interviews — supports loops, panels, and multi-stage onsites</div></div>
+      <div class="card-body">
+        <div id="tpl-picker-wrap" style="margin-bottom:14px"></div>
+        <div class="int-list" id="intList"></div><button class="add-btn" onclick="addInt()">+ Add Interview</button></div>
+      <div class="card-ft"><button class="btn btn-ghost" onclick="rGo(1)">← Back</button><button class="btn btn-navy" onclick="rGo(3)">Next: Review & Submit →</button></div>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div id="rS3" class="hidden">
+    <div class="card">
+      <div class="card-hd"><div class="card-title">Review & Submit</div><div class="card-sub">Confirm everything before sending to the coordinator queue</div></div>
+      <div class="card-body" id="reviewBody"></div>
+      <div class="card-ft"><button class="btn btn-ghost" onclick="rGo(2)">← Back</button><button class="btn btn-teal" onclick="submitReq()">✓ Submit to Queue</button></div>
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div id="rSucc" class="hidden">
+    <div class="card"><div style="text-align:center;padding:56px 24px">
+      <div style="width:56px;height:56px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 18px;color:var(--green)">✓</div>
+      <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px">Request Submitted!</div>
+      <div style="font-size:14px;color:var(--muted);max-width:380px;margin:0 auto 28px">Your scheduling request is now in the coordinator queue.</div>
+      <button class="btn btn-navy" onclick="resetRec()">Submit Another Request</button>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══ COORDINATOR ══ -->
+<div id="coordView" class="hidden">
+
+  <!-- Queue -->
+  <div id="vQueue" class="main">
+    <div class="qhdr">
+      <div><div style="font-size:18px;font-weight:700;color:var(--text)">Scheduling Queue</div><div style="font-size:13px;color:var(--muted);margin-top:3px">Click a request to schedule</div></div>
+      <div class="fwrap">
+        <button class="fbtn on" onclick="setQF(this,'all')">All</button>
+        <button class="fbtn" onclick="setQF(this,'pending')">Pending</button>
+        <button class="fbtn" onclick="setQF(this,'scheduled')">Scheduled</button>
+      </div>
+    </div>
+    <div id="ticketList"></div>
+  </div>
+
+  <!-- Ticket Detail -->
+  <div id="vTicket" class="main hidden">
+    <div style="margin-bottom:20px"><button class="btn btn-ghost btn-sm" onclick="closeTicket()">← Back to queue</button></div>
+    <div id="ticketBody"></div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="vDash" class="main hidden">
+    <div class="dhdr">
+      <div style="font-size:18px;font-weight:700;color:var(--text)">Interview Dashboard</div>
+      <div class="fwrap">
+        <button class="fbtn on" onclick="setDF(this,'all')">All</button>
+        <button class="fbtn" onclick="setDF(this,'today')">Today</button>
+        <button class="fbtn" onclick="setDF(this,'week')">This Week</button>
+      </div>
+    </div>
+    <div id="dashList"></div>
+  </div>
+
+  <!-- Reports -->
+  <div id="vRpt" class="main hidden">
+    <div class="rtoolbar">
+      <div class="rtoolbar-title">Generate Report</div>
+      <div class="rrow"><div class="rlbl">Period</div><div class="rpills"><button class="rpill on" onclick="setRP(this,'week')">This Week</button><button class="rpill" onclick="setRP(this,'month')">This Month</button><button class="rpill" onclick="setRP(this,'all')">All Time</button></div></div>
+      <div class="rrow"><div class="rlbl">View</div><div class="rpills"><button class="rpill on" onclick="setRV(this,'summary')">Summary</button><button class="rpill" onclick="setRV(this,'dept')">By Department</button><button class="rpill" onclick="setRV(this,'rec')">By Recruiter</button><button class="rpill" onclick="setRV(this,'role')">By Role</button></div></div>
+      <div class="rrow" id="roleFilterRow" style="display:none"><div class="rlbl">Role</div><select id="roleFilter" onchange="renderRpt()" style="max-width:280px;padding:7px 12px;font-size:13px"><option value="">All Roles</option></select></div>
+    </div>
+    <div class="rpreview" id="rptPrev"></div>
+  </div>
+</div>
+
+  <div id="vHist" class="main hidden">
+    <div style="margin-bottom:20px">
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">Historic Interviews</div>
+      <div style="font-size:13px;color:var(--muted)">Past interviews, auto-archived when their date passes</div>
+    </div>
+    <div style="margin-bottom:16px">
+      <input type="text" id="histSearch" placeholder="Search by candidate, role, or recruiter..." oninput="renderHist()" style="width:100%;max-width:420px"/>
+    </div>
+    <div id="histList"></div>
+  </div>
+
+<!-- Settings -->
+  <div id="vSettings" class="main hidden">
+    <div style="margin-bottom:20px">
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">Team Settings</div>
+      <div style="font-size:13px;color:var(--muted)">Configure Locked In. for your team. Changes apply immediately.</div>
+    </div>
+
+    <!-- BRANDING -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-hd"><div class="card-title">Branding</div><div class="card-sub">How your team sees the tool</div></div>
+      <div class="card-body">
+        <div class="fgrid">
+          <div class="fg"><label>Company Name</label><input type="text" id="cfg-company" placeholder="Your Company" oninput="saveConfig()"/></div>
+          <div class="fg"><label>Logo URL <span style="font-size:10px;color:var(--dim)">(optional)</span></label><input type="text" id="cfg-logo" placeholder="https://..." oninput="saveConfig()"/><div class="hint">Paste a direct image URL — shown in email previews</div></div>
+        </div>
+        <div style="margin-top:14px;padding:12px 14px;background:var(--surface);border-radius:8px;display:flex;align-items:center;gap:10px">
+          <div id="cfg-logo-preview" style="width:32px;height:32px;background:var(--navy);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div id="cfg-company-preview" style="font-size:14px;font-weight:600;color:var(--text)">Locked In.</div>
+            <div style="font-size:11px;color:var(--dim)">Interview Scheduler</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEAM / RECRUITERS -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-hd"><div class="card-title">Recruiters</div><div class="card-sub">Names that appear in the recruiter dropdown</div></div>
+      <div class="card-body">
+        <div id="recruiter-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="new-recruiter" placeholder="Full name" style="flex:1" onkeydown="if(event.key==='Enter')addRecruiter()"/>
+          <button class="btn btn-navy btn-sm" onclick="addRecruiter()">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERVIEW STAGES -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-hd"><div class="card-title">Interview Stages</div><div class="card-sub">Options shown when building interviews</div></div>
+      <div class="card-body">
+        <div id="stage-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="new-stage" placeholder="e.g. Case Study Interview" style="flex:1" onkeydown="if(event.key==='Enter')addStage()"/>
+          <button class="btn btn-navy btn-sm" onclick="addStage()">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERVIEW TEMPLATES -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-hd"><div class="card-title">Interview Templates</div><div class="card-sub">Pre-built loops recruiters can select in one click</div></div>
+      <div class="card-body">
+        <div id="template-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px">Add New Template</div>
+          <div class="fgrid" style="gap:12px">
+            <div class="fg full"><label>Template Name</label><input type="text" id="tpl-name" placeholder="e.g. Standard Engineering Loop"/></div>
+          </div>
+          <div id="tpl-interviews" style="display:flex;flex-direction:column;gap:8px;margin:12px 0"></div>
+          <button class="btn btn-ghost btn-sm" onclick="addTplInterview()" style="margin-bottom:12px">+ Add Interview to Template</button>
+          <div><button class="btn btn-navy btn-sm" onclick="saveTemplate()">Save Template</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL TEMPLATE -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-hd"><div class="card-title">Email Template</div><div class="card-sub">Confirmation email sent to candidates</div></div>
+      <div class="card-body">
+        <div class="fgrid">
+          <div class="fg full"><label>Subject Line</label><input type="text" id="cfg-subject" placeholder="Your interview is confirmed — {role} at {company}" oninput="saveConfig()"/><div class="hint">Use {role}, {company}, {date} as dynamic placeholders</div></div>
+          <div class="fg full"><label>Opening line</label><input type="text" id="cfg-opening" placeholder="I'm pleased to confirm your interview for the {role} role." oninput="saveConfig()"/></div>
+          <div class="fg full"><label>Sign-off</label><input type="text" id="cfg-signoff" placeholder="The Talent Team" oninput="saveConfig()"/></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn btn-ghost" onclick="resetConfig()">Reset to defaults</button>
+      <button class="btn btn-teal" onclick="saveConfig();alert('Settings saved!')">Save Settings</button>
+    </div>
+  </div>
+
+<!-- Email Modal -->
+<div class="modal" id="emailModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="mbox">
+    <div class="mhd"><div style="font-size:14px;font-weight:600;color:#fff">Email Confirmation Preview</div><button class="mclose" onclick="document.getElementById('emailModal').classList.remove('open')">&#215;</button></div>
+    <div class="mbody" id="emailBody"></div>
+  </div>
+</div>
+
+<script>
+var S = {
+  queue: [], intCount: 0, coordTab: 'queue',
+  qF: 'all', dF: 'all', rpPeriod: 'week', rpView: 'summary',
+  selSlots: {}, curTicket: null, scheduled: [], historic: [], _parsedSlots: []
+};
+
+// ─ Config (persisted to localStorage) ────────────────────────────
+var DEFAULT_CONFIG = {
+  company: 'Locked In.',
+  logoUrl: '',
+  recruiters: [],
+  stages: ['Phone Screen','Hiring Manager Interview','Team Interview','Technical Interview','Panel Interview','Final Round','Executive Interview'],
+  emailSubject: 'Your interview is confirmed — {role}',
+  emailOpening: 'I\'m pleased to confirm your interview for the {role} role.',
+  emailSignoff: 'The Talent Team',
+  templates: []
+};
+
+function loadConfig() {
+  try {
+    var saved = localStorage.getItem('lockedin_config');
+    return saved ? Object.assign({}, DEFAULT_CONFIG, JSON.parse(saved)) : Object.assign({}, DEFAULT_CONFIG);
+  } catch(e) { return Object.assign({}, DEFAULT_CONFIG); }
+}
+
+function saveConfig() {
+  var cfg = {
+    company: document.getElementById('cfg-company').value || DEFAULT_CONFIG.company,
+    logoUrl: document.getElementById('cfg-logo').value || '',
+    recruiters: S.config.recruiters,
+    stages: S.config.stages,
+    templates: S.config.templates,
+    emailSubject: document.getElementById('cfg-subject').value || DEFAULT_CONFIG.emailSubject,
+    emailOpening: document.getElementById('cfg-opening').value || DEFAULT_CONFIG.emailOpening,
+    emailSignoff: document.getElementById('cfg-signoff').value || DEFAULT_CONFIG.emailSignoff
+  };
+  S.config = cfg;
+  try { localStorage.setItem('lockedin_config', JSON.stringify(cfg)); } catch(e) {}
+  applyConfig();
+}
+
+function resetConfig() {
+  if (!confirm('Reset all settings to defaults?')) return;
+  S.config = Object.assign({}, DEFAULT_CONFIG);
+  try { localStorage.removeItem('lockedin_config'); } catch(e) {}
+  renderSettings();
+  applyConfig();
+}
+
+function applyConfig() {
+  var cfg = S.config;
+  // Update recruiter datalist
+  var dl = document.getElementById('recList');
+  if (dl) {
+    dl.innerHTML = cfg.recruiters.map(function(r) { return '<option value="' + r + '">'; }).join('');
+  }
+  // Update company in header logo
+  var ln = document.querySelector('.logo-name');
+  if (ln) ln.textContent = cfg.company || 'Locked In.';
+  // Update branding preview
+  var cp = document.getElementById('cfg-company-preview');
+  if (cp) cp.textContent = cfg.company || 'Locked In.';
+  var lp = document.getElementById('cfg-logo-preview');
+  if (lp) {
+    if (cfg.logoUrl) {
+      lp.innerHTML = '<img src="' + cfg.logoUrl + '" style="width:28px;height:28px;border-radius:5px;object-fit:cover"/>';
+    } else {
+      lp.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+  }
+}
+
+function renderSettings() {
+  var cfg = S.config;
+  // Branding
+  var el = document.getElementById('cfg-company'); if (el) el.value = cfg.company || '';
+  var el2 = document.getElementById('cfg-logo'); if (el2) el2.value = cfg.logoUrl || '';
+  // Email
+  var es = document.getElementById('cfg-subject'); if (es) es.value = cfg.emailSubject || '';
+  var eo = document.getElementById('cfg-opening'); if (eo) eo.value = cfg.emailOpening || '';
+  var esf = document.getElementById('cfg-signoff'); if (esf) esf.value = cfg.emailSignoff || '';
+  // Recruiters
+  renderRecruiterList();
+  // Stages
+  renderStageList();
+  // Templates
+  renderTemplateList();
+  applyConfig();
+}
+
+function renderRecruiterList() {
+  var list = document.getElementById('recruiter-list'); if (!list) return;
+  if (!S.config.recruiters.length) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--dim);padding:8px 0">No recruiters added yet. Add your team below.</div>';
+    return;
+  }
+  list.innerHTML = S.config.recruiters.map(function(r, i) {
+    return '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px">' +
+      '<span style="font-size:13px;color:var(--text)">' + r + '</span>' +
+      '<button class="btn btn-ghost btn-sm" onclick="removeRecruiter(' + i + ')" style="padding:4px 10px;font-size:11px;color:var(--red);border-color:var(--red-light)">Remove</button>' +
+      '</div>';
+  }).join('');
+}
+
+function addRecruiter() {
+  var inp = document.getElementById('new-recruiter');
+  var val = inp.value.trim();
+  if (!val) return;
+  if (S.config.recruiters.indexOf(val) !== -1) { inp.value = ''; return; }
+  S.config.recruiters.push(val);
+  inp.value = '';
+  saveConfig(); renderRecruiterList();
+}
+
+function removeRecruiter(i) {
+  S.config.recruiters.splice(i, 1);
+  saveConfig(); renderRecruiterList();
+}
+
+function renderStageList() {
+  var list = document.getElementById('stage-list'); if (!list) return;
+  list.innerHTML = S.config.stages.map(function(st, i) {
+    return '<div style="display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px">' +
+      '<span style="font-size:12px;font-weight:500;color:var(--text)">' + st + '</span>' +
+      '<button onclick="removeStage(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--dim);font-size:14px;line-height:1;padding:0">&times;</button>' +
+      '</div>';
+  }).join('');
+}
+
+function addStage() {
+  var inp = document.getElementById('new-stage');
+  var val = inp.value.trim();
+  if (!val) return;
+  if (S.config.stages.indexOf(val) !== -1) { inp.value = ''; return; }
+  S.config.stages.push(val);
+  inp.value = '';
+  saveConfig(); renderStageList(); updStageDropdowns();
+}
+
+function removeStage(i) {
+  S.config.stages.splice(i, 1);
+  saveConfig(); renderStageList(); updStageDropdowns();
+}
+
+function updStageDropdowns() {
+  document.querySelectorAll('[id^="is"]').forEach(function(sel) {
+    if (sel.tagName !== 'SELECT') return;
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">Select...</option>' + S.config.stages.map(function(st) {
+      return '<option' + (st === cur ? ' selected' : '') + '>' + st + '</option>';
+    }).join('');
+  });
+}
+
+// ─ Interview Templates ────────────────────────────────────────────
+var tplIntCount = 0;
+
+function addTplInterview() {
+  tplIntCount++;
+  var id = tplIntCount;
+  var wrap = document.getElementById('tpl-interviews');
+  var div = document.createElement('div');
+  div.id = 'tpl-int-' + id;
+  div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px';
+  div.innerHTML =
+    '<input type="text" placeholder="Interview name (e.g. HM Interview)" style="font-size:13px"/>' +
+    '<select style="font-size:12px"><option value="">Stage...</option>' + S.config.stages.map(function(s){return '<option>'+s+'</option>';}).join('') + '</select>' +
+    '<select style="font-size:12px"><option>60 minutes</option><option>30 minutes</option><option>45 minutes</option><option>90 minutes</option></select>' +
+    '<button class="btn btn-ghost btn-sm" onclick="this.parentNode.remove()" style="padding:5px 9px;color:var(--red)">✕</button>';
+  wrap.appendChild(div);
+}
+
+function saveTemplate() {
+  var name = document.getElementById('tpl-name').value.trim();
+  if (!name) { document.getElementById('tpl-name').focus(); return; }
+  var rows = document.querySelectorAll('#tpl-interviews > div');
+  if (!rows.length) { alert('Add at least one interview to the template.'); return; }
+  var interviews = Array.from(rows).map(function(row) {
+    var inputs = row.querySelectorAll('input, select');
+    return { name: inputs[0].value || 'Interview', stage: inputs[1].value, duration: inputs[2].value };
+  }).filter(function(i) { return i.name.trim(); });
+  if (!interviews.length) return;
+  S.config.templates.push({ id: Date.now(), name: name, interviews: interviews });
+  document.getElementById('tpl-name').value = '';
+  document.getElementById('tpl-interviews').innerHTML = '';
+  tplIntCount = 0;
+  saveConfig();
+  renderTemplateList();
+  renderTemplatePicker();
+}
+
+function removeTemplate(id) {
+  S.config.templates = S.config.templates.filter(function(t) { return t.id !== id; });
+  saveConfig(); renderTemplateList(); renderTemplatePicker();
+}
+
+function renderTemplateList() {
+  var list = document.getElementById('template-list'); if (!list) return;
+  if (!S.config.templates.length) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--dim);padding:4px 0">No templates yet. Create one below.</div>';
+    return;
+  }
+  list.innerHTML = S.config.templates.map(function(tpl) {
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">' +
+      '<div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px">' + tpl.name + '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:5px">' +
+      tpl.interviews.map(function(inv) {
+        return '<span style="font-size:11px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2px 9px;color:var(--muted)">' + inv.name + ' · ' + inv.duration + '</span>';
+      }).join('') + '</div></div>' +
+      '<button class="btn btn-ghost btn-sm" onclick="removeTemplate(' + tpl.id + ')" style="font-size:11px;color:var(--red);border-color:var(--red-light);flex-shrink:0">Remove</button>' +
+      '</div>';
+  }).join('');
+}
+
+function renderTemplatePicker() {
+  var wrap = document.getElementById('tpl-picker-wrap'); if (!wrap) return;
+  if (!S.config.templates.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML =
+    '<div style="background:var(--teal-light);border:1px solid var(--teal-mid);border-radius:10px;padding:14px 16px;margin-bottom:2px">' +
+    '<div style="font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--teal2);margin-bottom:10px">Quick-fill from template</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
+    S.config.templates.map(function(tpl) {
+      return '<button class="btn btn-ghost btn-sm" onclick="applyTemplate(' + tpl.id + ')" style="border-color:var(--teal-mid);color:var(--navy);font-size:12px">' +
+        tpl.name + ' <span style="color:var(--dim);font-weight:400">(' + tpl.interviews.length + ' interview' + (tpl.interviews.length !== 1 ? 's' : '') + ')</span></button>';
+    }).join('') +
+    '</div></div>';
+}
+
+function applyTemplate(id) {
+  var tpl = S.config.templates.find(function(t) { return t.id === id; });
+  if (!tpl) return;
+  document.getElementById('intList').innerHTML = '';
+  S.intCount = 0;
+  tpl.interviews.forEach(function(inv) {
+    addInt();
+    var i = S.intCount;
+    var nameEl = document.getElementById('in' + i);
+    var stageEl = document.getElementById('is' + i);
+    var durEl = document.getElementById('id' + i);
+    if (nameEl) nameEl.value = inv.name;
+    if (stageEl) {
+      // find matching option
+      Array.from(stageEl.options).forEach(function(opt) { if (opt.value === inv.stage) opt.selected = true; });
+    }
+    if (durEl) {
+      Array.from(durEl.options).forEach(function(opt) { if (opt.value === inv.duration) opt.selected = true; });
+    }
+    updInt(i);
+  });
+}
+
+S.config = loadConfig();
+
+// ─ Persona ────────────────────────────────────────────────────────
+function autoArchive() {
+  var now = new Date(); now.setHours(0,0,0,0);
+  var toArchive = [];
+  S.queue.forEach(function(t) {
+    if (t.status === 'scheduled') {
+      // Check if all interviews have past dates
+      var allPast = t.interviews.every(function(inv) {
+        var slot = S.selSlots && S.selSlots[inv.id];
+        var d = t.scheduledDate ? new Date(t.scheduledDate) : new Date(t.dateObj || now);
+        d.setHours(0,0,0,0);
+        return d < now;
+      });
+      if (allPast) toArchive.push(t.id);
+    }
+  });
+  toArchive.forEach(function(id) {
+    var idx = S.queue.findIndex(function(t) { return t.id === id; });
+    if (idx !== -1) {
+      var t = S.queue.splice(idx, 1)[0];
+      t.status = 'historic';
+      S.historic.push(t);
+    }
+  });
+}
+
+function switchP(p) {
+  var isC = p === 'coord';
+  document.getElementById('recView').classList.toggle('hidden', isC);
+  document.getElementById('coordView').classList.toggle('hidden', !isC);
+  document.getElementById('coordTabs').classList.toggle('hidden', !isC);
+  document.getElementById('btnRec').classList.toggle('active', !isC);
+  document.getElementById('btnCoord').classList.toggle('active', isC);
+  if (isC) { autoArchive(); switchTab(S.coordTab); }
+}
+
+// ─ Coord Tabs ─────────────────────────────────────────────────────
+function switchTab(t) {
+  S.coordTab = t;
+  var map = { queue: 'vQueue', dash: 'vDash', rpt: 'vRpt', hist: 'vHist', settings: 'vSettings' };
+  document.getElementById('vTicket').classList.add('hidden');
+  ['Queue','Dash','Rpt','Hist','Settings'].forEach(function(k) {
+    var el = document.getElementById('tab' + k);
+    if (el) el.classList.toggle('active', k.toLowerCase() === t);
+    var vel = document.getElementById(map[k.toLowerCase()]);
+    if (vel) vel.classList.toggle('hidden', k.toLowerCase() !== t);
+  });
+  if (t === 'queue') renderQueue();
+  if (t === 'dash') renderDash();
+  if (t === 'rpt') renderRpt();
+  if (t === 'hist') renderHist();
+  if (t === 'settings') renderSettings();
+}
+
+// ─ Recruiter Steps ────────────────────────────────────────────────
+function rGo(n) {
+  if (n === 2 && !val1()) return;
+  if (n === 2) renderTemplatePicker();
+  if (n === 3) renderReview();
+  for (var i = 1; i <= 3; i++) {
+    document.getElementById('rS' + i).classList.toggle('hidden', i !== n);
+    document.getElementById('rd' + i).className = 'sdot' + (i < n ? ' done' : i === n ? ' active' : '');
+    document.getElementById('rlb' + i).className = 'slbl' + (i < n ? ' done' : i === n ? ' active' : '');
+    if (i < 3) document.getElementById('rl' + i).className = 'sline' + (i < n ? ' done' : '');
+  }
+}
+
+function val1() {
+  var req = ['jobId', 'recName', 'candName', 'candEmail', 'jobTitle'];
+  for (var i = 0; i < req.length; i++) {
+    var el = document.getElementById(req[i]);
+    if (!el.value.trim()) { el.focus(); el.style.borderColor = 'var(--red)'; return false; }
+    el.style.borderColor = '';
+  }
+  if (!document.getElementById('availRaw').value.trim()) { document.getElementById('availRaw').focus(); return false; }
+
+  // Email format validation
+  var emailEl = document.getElementById('candEmail');
+  var email = emailEl.value.trim();
+  var emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  if (!emailValid) {
+    emailEl.focus(); emailEl.style.borderColor = 'var(--red)';
+    var hint = emailEl.parentNode.querySelector('.hint') || emailEl.parentNode.appendChild(Object.assign(document.createElement('div'), {className:'hint',style:'color:var(--red)'}));
+    hint.textContent = 'Please enter a valid email address (e.g. name@company.com)';
+    hint.style.color = 'var(--red)';
+    return false;
+  } else {
+    emailEl.style.borderColor = '';
+    var hint2 = emailEl.parentNode.querySelector('.hint');
+    if (hint2) hint2.textContent = '';
+  }
+
+  // Resume required
+  var rf = document.getElementById('resume');
+  if (!rf || !rf.files || !rf.files[0]) {
+    rf.focus(); rf.style.borderColor = 'var(--red)';
+    return false;
+  }
+  rf.style.borderColor = '';
+
+  return true;
+}
+
+// ─ Availability Parser ────────────────────────────────────────────
+function parseAvail() {
+  var raw = document.getElementById('availRaw').value;
+  var slots = extractSlots(raw);
+  var cont = document.getElementById('parsedSlots');
+  var res = document.getElementById('availRes');
+  var noMsg = document.getElementById('noParseMsg');
+  cont.innerHTML = '';
+  S._parsedSlots = slots; // store in state so submit can read them
+  if (!slots.length) {
+    res.classList.add('hidden');
+    if (noMsg && raw.trim().length > 10) noMsg.classList.remove('hidden');
+    return;
+  }
+  if (noMsg) noMsg.classList.add('hidden');
+  res.classList.remove('hidden');
+  slots.forEach(function(s) {
+    var b = document.createElement('button');
+    b.className = 'aslot'; b.textContent = s;
+    b.onclick = function() { b.classList.toggle('on'); };
+    cont.appendChild(b);
+  });
+  var countEl = document.getElementById('parsedCount');
+  if (countEl) countEl.textContent = slots.length + ' time slot' + (slots.length !== 1 ? 's' : '') + ' detected — coordinator will select from these';
+}
+
+function addManualSlot() {
+  var input = document.getElementById('manualSlot');
+  var val = input.value.trim();
+  if (!val) return;
+  var cont = document.getElementById('parsedSlots');
+  var res = document.getElementById('availRes');
+  res.classList.remove('hidden');
+  var b = document.createElement('button');
+  b.className = 'aslot on'; b.textContent = val;
+  b.onclick = function() { b.classList.toggle('on'); };
+  cont.appendChild(b);
+  input.value = '';
+}
+
+function extractSlots(text) {
+  var slots = [];
+  var lower = text.toLowerCase();
+  var DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+
+  // Find all time expressions: 10am, 10:30am, 10 am, 10:30 am, 8a, 9p, OR bare numbers
+  function findTimes(str) {
+    // First try with explicit am/pm or a/p shorthand
+    var re = /\b(\d{1,2}(?::\d{2})?\s*(?:am|pm|a|p))\b/gi;
+    var results = []; var m;
+    while ((m = re.exec(str)) !== null) results.push({ pos: m.index, val: m[1].replace(/\s+/g,'').toLowerCase().replace(/(?<=[0-9])a$/,'am').replace(/(?<=[0-9])p$/,'pm') });
+    // If none found, try bare number ranges like "9-5", "9-8", "10-4"
+    if (!results.length) {
+      var bareRange = /\b(\d{1,2})\s*[-\u2013]\s*(\d{1,2})\b(?:\s*(?:est|pst|cst|mst|edt|pdt|cdt|mdt|utc))?/gi;
+      while ((m = bareRange.exec(str)) !== null) {
+        var h1 = parseInt(m[1]); var h2 = parseInt(m[2]);
+        var s1 = h1 + (h1 < 8 ? 'pm' : 'am');
+        var s2 = h2 + (h2 <= 8 || h2 < h1 ? 'pm' : 'am');
+        results.push({ pos: m.index, val: s1 + ' \u2013 ' + s2 });
+        return results; // return the range as one item
+      }
+      // Single bare numbers near day mentions
+      var bareNum = /\b(\d{1,2})(?::(\d{2}))?\b(?!\s*(?:st|nd|rd|th))/g;
+      while ((m = bareNum.exec(str)) !== null) {
+        var h = parseInt(m[1]);
+        if (h >= 1 && h <= 12) {
+          var suffix = h < 8 ? 'pm' : 'am';
+          var val = h + (m[2] ? ':' + m[2] : '') + suffix;
+          results.push({ pos: m.index, val: val });
+        }
+      }
+    }
+    return results;
+  }
+
+  // Find all day mentions
+  var dayHits = [];
+  DAYS.forEach(function(day) {
+    var re = new RegExp('\\b' + day + '\\b', 'gi');
+    var m;
+    while ((m = re.exec(lower)) !== null) dayHits.push({ pos: m.index, day: day.charAt(0).toUpperCase() + day.slice(1) });
+  });
+  dayHits.sort(function(a,b){ return a.pos - b.pos; });
+
+  dayHits.forEach(function(dh) {
+    // Look at the 200 chars after the day name
+    var chunk = lower.slice(dh.pos, dh.pos + 200);
+    var times = findTimes(chunk);
+
+    // Try to find date number near day
+    var dateM = chunk.match(/\b(\d{1,2})(?:st|nd|rd|th)?\b/);
+    var dateStr = dateM && parseInt(dateM[1]) <= 31 ? ' ' + dateM[1] : '';
+
+    // Try to find month near day (within 40 chars before or after)
+    var nearby = lower.slice(Math.max(0, dh.pos - 20), dh.pos + 60);
+    var monthRe = /\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/i;
+    var monM = nearby.match(monthRe);
+    var monStr = monM ? ' ' + monM[1].charAt(0).toUpperCase() + monM[1].slice(1,3).toLowerCase() : '';
+
+    var prefix = dh.day + monStr + dateStr;
+
+    if (times.length >= 2) {
+      var slot = prefix + ' \xb7 ' + times[0].val + ' \u2013 ' + times[1].val;
+      if (slots.indexOf(slot) === -1) slots.push(slot);
+    } else if (times.length === 1) {
+      var slot2 = prefix + ' \xb7 ' + times[0].val;
+      if (slots.indexOf(slot2) === -1) slots.push(slot2);
+    } else {
+      // Look for time-of-day words
+      var todM = chunk.match(/\b(morning|afternoon|evening|anytime|all day|any time)\b/i);
+      if (todM) {
+        var slot3 = prefix + ' \xb7 ' + todM[1].charAt(0).toUpperCase() + todM[1].slice(1);
+        if (slots.indexOf(slot3) === -1) slots.push(slot3);
+      }
+    }
+  });
+
+  // Fallback: if no day context found, just grab time ranges
+  if (!slots.length) {
+    var trRe = /(\d{1,2}(?::\d{2})?\s*(?:am|pm))\s*(?:[-\u2013]|to)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm))/gi;
+    var m2;
+    while ((m2 = trRe.exec(text)) !== null) {
+      slots.push(m2[1].replace(/\s+/g,'') + ' \u2013 ' + m2[2].replace(/\s+/g,''));
+    }
+  }
+
+  return slots.slice(0, 12);
+}
+
+// ─ Interview Builder ──────────────────────────────────────────────
+function addInt() {
+  S.intCount++;
+  var id = S.intCount;
+  var list = document.getElementById('intList');
+  var div = document.createElement('div');
+  div.className = 'int-card'; div.id = 'ic' + id;
+  div.innerHTML =
+    '<div class="int-hd" onclick="toggleInt(' + id + ')">' +
+    '<div class="int-num">' + id + '</div>' +
+    '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)" id="itn' + id + '">Interview ' + id + '</div>' +
+    '<div style="font-size:12px;color:var(--muted);margin-top:2px" id="itm' + id + '">Click to configure</div></div>' +
+    '<button class="btn btn-danger btn-sm" onclick="rmInt(event,' + id + ')">Remove</button></div>' +
+    '<div class="int-body open" id="ib' + id + '">' +
+    '<div class="fgrid" style="gap:12px">' +
+    '<div class="fg full"><label>Interview Name <span class="req">*</span></label>' +
+    '<input type="text" id="in' + id + '" placeholder="e.g. Engineering Screen, SQL Assessment, Hiring Manager Interview" oninput="updInt(' + id + ')"/></div>' +
+    '<div class="fg"><label>Stage</label><select id="is' + id + '" onchange="updInt(' + id + ')">' +
+    (function(){var opts='<option value="">Select...</option>';S.config.stages.forEach(function(st){opts+='<option>'+st+'</option>';});return opts;})() + '</select></div>' +
+    '<div class="fg"><label>Duration</label><select id="id' + id + '" onchange="updInt(' + id + ')">' +
+    '<option>30 minutes</option><option>45 minutes</option><option selected>60 minutes</option><option>90 minutes</option></select></div>' +
+    '<div class="fg"><label>Mode</label><select id="im' + id + '" onchange="updInt(' + id + ')">' +
+    '<option>Virtual</option><option>Phone</option><option>Onsite</option></select></div>' +
+    '<div class="fg full"><label>Interviewers (one per line)</label>' +
+    '<textarea id="ii' + id + '" placeholder="Jane Smith&#10;John Doe" style="min-height:70px" oninput="updInt(' + id + ')"></textarea></div>' +
+    '</div></div>';
+  list.appendChild(div);
+}
+
+function toggleInt(id) { document.getElementById('ib' + id).classList.toggle('open'); }
+function rmInt(e, id) { e.stopPropagation(); var c = document.getElementById('ic' + id); if (c) c.remove(); }
+function updInt(id) {
+  var name = document.getElementById('in' + id).value || 'Interview ' + id;
+  var meta = [document.getElementById('is' + id).value, document.getElementById('id' + id).value, document.getElementById('im' + id).value].filter(Boolean).join(' · ');
+  document.getElementById('itn' + id).textContent = name;
+  document.getElementById('itm' + id).textContent = meta || 'Click to configure';
+}
+function getInts() {
+  return Array.from(document.querySelectorAll('.int-card')).map(function(c) {
+    var id = c.id.replace('ic', '');
+    var ii = document.getElementById('ii' + id);
+    return { id: id, name: document.getElementById('in' + id).value || 'Interview ' + id,
+      stage: document.getElementById('is' + id).value, duration: document.getElementById('id' + id).value,
+      mode: document.getElementById('im' + id).value,
+      interviewers: ii ? ii.value.split('\n').map(function(s) { return s.trim(); }).filter(Boolean) : [] };
+  });
+}
+
+// ─ Review ─────────────────────────────────────────────────────────
+function renderReview() {
+  var ints = getInts();
+  var slots = S._parsedSlots || [];
+  var rf = document.getElementById('resume');
+  var rname = rf && rf.files[0] ? rf.files[0].name : null;
+  document.getElementById('reviewBody').innerHTML =
+    '<div class="rgrid">' + mkRI('Job ID', gv('jobId')) + mkRI('Recruiter', gv('recName')) +
+    mkRI('Candidate', gv('candName')) + mkRI('Email', gv('candEmail')) +
+    mkRI('Job Title', gv('jobTitle')) +
+    (rname ? mkRI('Resume', rname) : '') + '</div>' +
+    (slots.length ? '<div style="margin:14px 0"><div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:8px">Availability (' + slots.length + ' slots)</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px">' + slots.map(function(s) { return '<span style="background:var(--green-light);border:1px solid var(--green-mid);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--green)">' + s + '</span>'; }).join('') + '</div></div>' : '') +
+    '<div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:8px">' + ints.length + ' Interview' + (ints.length !== 1 ? 's' : '') + '</div>' +
+    ints.map(function(inv) {
+      return '<div class="rv-int"><div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:8px">' + inv.name + '</div>' +
+        '<div class="chip-row">' + (inv.stage ? '<span class="chip">' + inv.stage + '</span>' : '') +
+        '<span class="chip">' + inv.duration + '</span><span class="chip">' + inv.mode + '</span>' +
+        inv.interviewers.map(function(i) { return '<span class="chip">' + i + '</span>'; }).join('') + '</div></div>';
+    }).join('');
+}
+
+function mkRI(l, v) { return '<div class="ri"><div class="ri-lbl">' + l + '</div><div class="ri-val">' + (v || '&mdash;') + '</div></div>'; }
+function gv(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+
+// ─ Submit ─────────────────────────────────────────────────────────
+function submitReq() {
+  var ints = getInts();
+  if (!ints.length) { alert('Please add at least one interview.'); rGo(2); return; }
+  var slots = S._parsedSlots || [];
+  var rf = document.getElementById('resume');
+  var ticket = {
+    id: Date.now(), candidate: gv('candName'), email: gv('candEmail'), phone: gv('candPhone'),
+    jobTitle: gv('jobTitle'), department: '', jobId: gv('jobId'), recruiter: gv('recName'),
+    resumeName: rf && rf.files[0] ? rf.files[0].name : null,
+    availRaw: document.getElementById('availRaw').value, availSlots: slots,
+    interviews: ints, status: 'pending',
+    submitted: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  };
+  // Save to Firestore
+  window.saveTicketToFirestore(ticket).then(function(savedTicket) {
+    S.queue.push(savedTicket); updBadge();
+  });
+  document.getElementById('recBar').classList.add('hidden');
+  document.getElementById('recLbls').classList.add('hidden');
+  for (var i = 1; i <= 3; i++) document.getElementById('rS' + i).classList.add('hidden');
+  document.getElementById('rSucc').classList.remove('hidden');
+}
+
+function updBadge() {
+  var b = document.getElementById('qBadge');
+  var p = S.queue.filter(function(t) { return t.status === 'pending'; }).length;
+  b.textContent = S.queue.length; b.style.display = S.queue.length ? 'inline' : 'none';
+  b.style.background = p ? 'var(--amber)' : 'var(--green)';
+}
+
+function resetRec() {
+  document.getElementById('recBar').classList.remove('hidden');
+  document.getElementById('recLbls').classList.remove('hidden');
+  document.getElementById('rSucc').classList.add('hidden');
+  document.getElementById('intList').innerHTML = '';
+  document.querySelectorAll('#recView input,#recView select,#recView textarea').forEach(function(el) { if (el.type !== 'hidden' && el.type !== 'file') el.value = ''; });
+  document.getElementById('availRes').classList.add('hidden');
+  S.intCount = 0; rGo(1); addInt();
+}
+
+// ─ Queue ──────────────────────────────────────────────────────────
+function renderQueue() {
+  var f = S.queue.filter(function(t) { return S.qF === 'all' || t.status === S.qF; });
+  var list = document.getElementById('ticketList');
+  if (!f.length) {
+    list.innerHTML = '<div class="empty"><div style="font-size:36px;margin-bottom:12px">📋</div>' +
+      '<div style="font-size:16px;font-weight:600;color:var(--muted);margin-bottom:6px">' + (S.queue.length ? 'No matches' : 'No requests yet') + '</div>' +
+      '<div style="font-size:13px;color:var(--dim)">' + (S.queue.length ? 'Try a different filter' : 'Switch to Recruiter view to submit a request') + '</div></div>';
+    return;
+  }
+  list.innerHTML = f.map(function(t) {
+    return '<div class="tcard" onclick="openTicket(' + t.id + ')">' +
+      '<div><div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">' + t.candidate + ' \u2014 ' + t.jobTitle + '</div>' +
+      '<div style="font-size:13px;color:var(--muted);margin-bottom:8px">' + t.recruiter + '</div>' +
+      '<div class="chip-row"><span class="chip">' + t.interviews.length + ' interview' + (t.interviews.length !== 1 ? 's' : '') + '</span>' +
+      '<span class="chip">' + t.availSlots.length + ' slots</span>' + (t.resumeName ? '<span class="chip">\uD83D\uDCCE Resume</span>' : '') + '</div></div>' +
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">' +
+      '<span class="b' + t.status.charAt(0) + '">' + t.status.charAt(0).toUpperCase() + t.status.slice(1) + '</span>' +
+      '<span style="font-size:11px;color:var(--dim)">' + t.submitted + '</span></div></div>';
+  }).join('');
+}
+
+function setQF(btn, f) {
+  S.qF = f;
+  document.querySelectorAll('.fwrap .fbtn').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on'); renderQueue();
+}
+
+// ─ Ticket Detail ──────────────────────────────────────────────────
+function openTicket(id) {
+  var t = S.queue.find(function(x) { return x.id === id; }); if (!t) return;
+  S.curTicket = id; S.selSlots = {};
+  document.getElementById('vQueue').classList.add('hidden');
+  document.getElementById('vTicket').classList.remove('hidden');
+  renderTicket(t);
+}
+
+function closeTicket() {
+  document.getElementById('vQueue').classList.remove('hidden');
+  document.getElementById('vTicket').classList.add('hidden');
+  // Update in Firestore
+  if (t._docId) window.updateTicketInFirestore(t._docId, { status: t.status, scheduledInterviews: t.scheduledInterviews });
+  S.curTicket = null; renderQueue();
+}
+
+function renderTicket(t) {
+  // Clean view for scheduled tickets
+  if (t.status === 'scheduled') {
+    var schedHtml = '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">' +
+      '<div><div style="font-size:20px;font-weight:700;color:var(--text)">' + t.candidate + ' — ' + t.jobTitle + '</div>' +
+      '<div style="font-size:13px;color:var(--muted);margin-top:3px">Submitted by ' + t.recruiter + ' · ' + t.submitted + '</div></div>' +
+      '<span class="bs" style="padding:6px 14px;font-size:12px">Scheduled</span></div>' +
+      '<div style="background:var(--green-light);border:1px solid var(--green-mid);border-radius:12px;padding:24px;margin-bottom:16px">' +
+      '<div style="font-size:15px;font-weight:600;color:var(--green);margin-bottom:12px">✓ All interviews scheduled</div>' +
+      t.interviews.map(function(inv) {
+        var slot = t.confirmedSlots && t.confirmedSlots[inv.id] ? t.confirmedSlots[inv.id] : 'Time confirmed';
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--green-mid);font-size:13px">' +
+          '<span style="font-weight:600;color:var(--text)">' + inv.name + '</span>' +
+          '<span style="color:var(--green);font-weight:500">' + slot + '</span></div>';
+      }).join('') +
+      '</div>' +
+      '<div style="display:flex;gap:8px;margin-top:8px">' +
+      '<button class="btn btn-ghost" onclick="closeTicket()">← Back to queue</button>' +
+      '<button class="btn btn-outline" onclick="rescheduleTicket()" style="color:var(--amber);border-color:var(--amber)">Reschedule</button>' +
+      '<button class="btn btn-outline" onclick="showEmail()">Preview Email</button></div>';
+    document.getElementById('ticketBody').innerHTML = schedHtml;
+    return;
+  }
+  var slotsHtml = '';
+
+  var intsHtml = t.interviews.map(function(inv) {
+    var slotBtns = t.availSlots.map(function(s, si) {
+      var p = s.split(' \xb7 ');
+      return '<button class="aslot" id="is' + inv.id + '_' + si + '" onclick="pickSlot(\'' + inv.id + '\',' + si + ',\'' + s.replace(/'/g, "\\'") + '\')">' + (p[1] || s) + (p[0] ? ' \xb7 ' + p[0] : '') + '</button>';
+    }).join('');
+    return '<div class="isb"><div class="isb-hd"><div class="isb-num">' + inv.id + '</div>' +
+      '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">' + inv.name + '</div></div>' +
+      '<div style="font-size:12px;color:var(--muted)">' + [inv.stage, inv.duration, inv.mode].filter(Boolean).join(' \xb7 ') + '</div></div>' +
+      '<div class="isb-body">' +
+      (inv.interviewers.length ? '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">' + inv.interviewers.map(function(i) { return '<span class="achip">' + i + '</span>'; }).join('') + '</div>' : '') +
+      (t.availSlots.length ?
+        '<div style="font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Select time</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px">' + slotBtns + '</div><div id="isSel' + inv.id + '"></div>' :
+        '<div style="font-size:13px;color:var(--dim)">No parsed slots \u2014 coordinate manually</div>') +
+      '</div></div>';
+  }).join('');
+
+  var actionsHtml;
+  if (t.status === 'pending') {
+    actionsHtml = '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px">' +
+      '<div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="closeTicket()">← Back</button>' +
+      '<button class="btn btn-outline" onclick="showEmail()">Preview Email</button></div>' +
+      '<button class="btn btn-teal" onclick="confirmSched()">✓ Confirm & Send Invites</button></div>';
+  } else if (t.status === 'scheduled') {
+    actionsHtml = '';
+  }
+
+  document.getElementById('ticketBody').innerHTML =
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">' +
+    '<div><div style="font-size:20px;font-weight:700;color:var(--text)">' + t.candidate + ' \u2014 ' + t.jobTitle + '</div>' +
+    '<div style="font-size:13px;color:var(--muted);margin-top:3px">Submitted by ' + t.recruiter + ' \xb7 ' + t.submitted + '</div></div>' +
+    '<span class="b' + t.status.charAt(0) + '" style="padding:6px 14px;font-size:12px">' + t.status.charAt(0).toUpperCase() + t.status.slice(1) + '</span></div>' +
+
+    '<div class="dsec"><div class="dtitle">Candidate Information</div><div class="dgrid">' +
+    mkDI('Candidate', t.candidate) + mkDI('Email', t.email) + mkDI('Job Title', t.jobTitle) +
+    mkDI('Job ID', t.jobId) + (t.phone ? mkDI('Phone', t.phone) : '') +
+    (t.resumeName ? '<div class="di"><div class="di-lbl">Resume</div><div class="di-val" style="color:var(--navy)">\uD83D\uDCCE ' + t.resumeName + '</div></div>' : '') +
+    '</div></div>' +
+
+    '<div class="dsec"><div class="dtitle">Candidate Availability</div>' +
+    '<div class="araw"><div style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);margin-bottom:6px">From recruiter</div>' + (t.availRaw || 'None provided') + '</div>' +
+    slotsHtml + '</div>' +
+
+    '<div class="dsec"><div class="dtitle">' + t.interviews.length + ' Interview' + (t.interviews.length !== 1 ? 's' : '') + ' to Schedule</div>' + intsHtml + '</div>' +
+
+    '<div class="dsec"><div class="dtitle">Calendar Previews</div>' +
+    '<div id="calWrap">' +
+    t.interviews.map(function(inv) {
+      return '<div style="margin-bottom:14px">' +
+        '<div style="font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">' + inv.name + '</div>' +
+        '<div class="cpreviews">' +
+        '<div class="cpw"><div class="cpl">Interviewer view</div>' +
+        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;font-size:12px;color:var(--dim)" id="calInt' + inv.id + '">Select a time above to preview</div></div>' +
+        '<div class="cpw"><div class="cpl">Candidate view</div>' +
+        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;font-size:12px;color:var(--dim)" id="calCand' + inv.id + '">Select a time above to preview</div></div>' +
+        '</div></div>';
+    }).join('') +
+    '</div></div>' +
+
+    actionsHtml;
+}
+
+function mkDI(l, v) { return '<div class="di"><div class="di-lbl">' + l + '</div><div class="di-val">' + (v || '&mdash;') + '</div></div>'; }
+
+function pickDateTime(invId) {
+  var dateEl = document.getElementById('idate' + invId);
+  var timeEl = document.getElementById('itime' + invId);
+  if (!dateEl || !timeEl || !dateEl.value || !timeEl.value) return;
+  // Format nicely
+  var d = new Date(dateEl.value + 'T' + timeEl.value);
+  var dateStr = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  var timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  var slotText = dateStr + ' \xb7 ' + timeStr;
+  S.selSlots[invId] = slotText;
+  var sel = document.getElementById('isSel' + invId);
+  if (sel) sel.innerHTML = '<div class="isb-sel" style="margin-top:8px">\u2713 ' + slotText + '</div>';
+  updCal();
+}
+
+function pickSlot(invId, si, s) {
+  S.selSlots[invId] = s;
+  document.querySelectorAll('[id^="is' + invId + '_"]').forEach(function(b) { b.classList.remove('on'); });
+  var btn = document.getElementById('is' + invId + '_' + si); if (btn) btn.classList.add('on');
+  var sel = document.getElementById('isSel' + invId); if (sel) sel.innerHTML = '<div class="isb-sel">✓ ' + s + '</div>';
+  updCal();
+}
+
+function pickGlobal(si, s) {
+  var t = S.queue.find(function(x) { return x.id === S.curTicket; }); if (!t) return;
+  t.interviews.forEach(function(inv) {
+    if (!S.selSlots[inv.id]) {
+      S.selSlots[inv.id] = s;
+      document.querySelectorAll('[id^="is' + inv.id + '_"]').forEach(function(b) { b.classList.remove('on'); });
+      var btn = document.getElementById('is' + inv.id + '_' + si); if (btn) btn.classList.add('on');
+      var sel = document.getElementById('isSel' + inv.id); if (sel) sel.innerHTML = '<div class="isb-sel">✓ ' + s + '</div>';
+    }
+  });
+  updCal();
+}
+
+function updCal() {
+  var t = S.queue.find(function(x) { return x.id === S.curTicket; }); if (!t) return;
+  t.interviews.forEach(function(inv) {
+    var slot = S.selSlots[inv.id];
+    if (!slot) return;
+    var intEl = document.getElementById('calInt' + inv.id);
+    var candEl = document.getElementById('calCand' + inv.id);
+    if (intEl) intEl.outerHTML = mkCal('calInt' + inv.id, inv, t, slot, true);
+    if (candEl) candEl.outerHTML = mkCal('calCand' + inv.id, inv, t, slot, false);
+  });
+}
+
+function mkCal(elId, inv, t, slot, isInt) {
+  var atts = isInt ? inv.interviewers.concat([t.candidate]) : inv.interviewers;
+  return '<div class="cal-inv" id="' + elId + '"><div class="cinv-hd">' +
+    '<div class="cinv-title">' + inv.mode + ' Interview \u2014 ' + (isInt ? t.candidate : t.jobTitle) + '</div>' +
+    '<div class="cinv-time">' + slot + ' \xb7 ' + inv.duration + '</div></div>' +
+    '<div class="cinv-body">' +
+    '<div class="crow"><span class="ckey">' + (isInt ? 'Candidate' : 'Role') + '</span><span>' + (isInt ? t.candidate : t.jobTitle) + '</span></div>' +
+    '<div class="crow"><span class="ckey">Stage</span><span>' + (inv.stage || 'Interview') + '</span></div>' +
+    '<div class="crow"><span class="ckey">Mode</span><span>' + inv.mode + '</span></div>' +
+    '<div class="crow"><span class="ckey">With</span><span><div class="achips">' + atts.map(function(a) { return '<span class="achip">' + a + '</span>'; }).join('') + '</div></span></div>' +
+    (t.resumeName && isInt ? '<div class="crow"><span class="ckey">Docs</span><span style="color:var(--navy)">\uD83D\uDCCE ' + t.resumeName + '</span></div>' : '') +
+    '</div></div>';
+}
+
+function rescheduleTicket() {
+  var t = S.queue.find(function(x) { return x.id === S.curTicket; }); if (!t) return;
+  t.status = 'pending'; // reopen for editing
+  S.selSlots = {}; // clear selected slots so coordinator re-picks
+  renderTicket(t);
+}
+
+function confirmSched() {
+  var t = S.queue.find(function(x) { return x.id === S.curTicket; }); if (!t) return;
+  t.status = 'scheduled';
+  t.scheduledDate = new Date();
+  t.confirmedSlots = Object.assign({}, S.selSlots);
+  t.interviews.forEach(function(inv) {
+    S.scheduled.push({ candidate: t.candidate, role: t.jobTitle, intName: inv.name, stage: inv.stage || 'Interview',
+      duration: inv.duration, mode: inv.mode, recruiter: t.recruiter, department: t.department,
+      interviewers: inv.interviewers, slot: S.selSlots[inv.id] || 'TBD', dateObj: new Date() });
+  });
+  updBadge(); renderTicket(t);
+}
+
+// ─ Email Preview ──────────────────────────────────────────────────
+function showEmail() {
+  var t = S.queue.find(function(x) { return x.id === S.curTicket; }); if (!t) return;
+  var inv = t.interviews[0] || { name: 'Interview', stage: '', duration: '60 minutes', mode: 'Virtual' };
+  var slot = S.selSlots[inv.id] || 'TBD';
+  var tips = {
+    'Phone Screen': ['Find a quiet space free from distractions', 'Have your resume handy', 'Be prepared to discuss your background and interest in the role'],
+    'Hiring Manager Interview': ['Review the job description thoroughly', 'Prepare examples of relevant experience', 'Have questions ready about the team and role'],
+    'Team Interview': ['You\'ll meet members of the team you\'d work with', 'Be yourself \u2014 we want to see how you collaborate', 'Feel free to ask about team dynamics and day-to-day work'],
+    'Final Round': ['This is your chance to show the full picture of who you are', 'Review your key accomplishments and how they relate to this role', 'We encourage you to ask questions \u2014 this is a two-way conversation']
+  };
+  var tipList = tips[inv.stage] || tips['Hiring Manager Interview'];
+  document.getElementById('emailBody').innerHTML =
+    '<div class="ep-outer"><div class="ep-card"><div class="ep-hd"><div style="display:flex;align-items:center;gap:10px">' +
+    '<div class="ep-mark">B</div><div><div style="font-size:13px;font-weight:600;color:#fff">Booked</div>' +
+    '<div style="font-size:10px;color:rgba(255,255,255,.6)">Interview Scheduling</div></div></div></div>' +
+    '<div class="ep-body"><div class="ep-greeting">Hi ' + t.candidate + ',</div>' +
+    '<p class="ep-para">I have confirmed you for <strong>' + slot + '</strong> for your <strong>' + (inv.stage || 'Interview') + '</strong> for the <strong>' + t.jobTitle + '</strong> role. This will be a <strong>' + inv.duration + '</strong> ' + inv.mode.toLowerCase() + ' interview.</p>' +
+    '<div class="ep-stitle">Tips for Your Interview</div>' +
+    '<ul class="ep-ul">' + tipList.map(function(tip) { return '<li>' + tip + '</li>'; }).join('') + '</ul>' +
+    '<div class="ep-lnk"><span style="font-size:13px;font-weight:500;color:#0D5F5A">Want to prepare? Check out our interview guide.</span>' +
+    '<a class="ep-btn" href="#" onclick="return false;">View Guide →</a></div>' +
+    '<hr class="ep-div"/>' +
+    '<div class="ep-sign">Please reach out to <strong>' + t.recruiter + '</strong> with any questions.<br><br>Good luck!<br><strong>The Talent Team</strong></div>' +
+    '</div><div class="ep-ft"><div class="ep-ft-txt">' + (S.config.company||'Locked In.') + ' \u2014 Interview Scheduling</div></div></div></div>';
+  document.getElementById('emailModal').classList.add('open');
+}
+
+// ─ Dashboard ──────────────────────────────────────────────────────
+function renderDash() {
+  var data = S.scheduled;
+  var today = new Date(); today.setHours(0,0,0,0);
+  var we = new Date(today); we.setDate(we.getDate() + 7);
+  if (S.dF === 'today') data = data.filter(function(i) { var d = new Date(i.dateObj); d.setHours(0,0,0,0); return d.getTime() === today.getTime(); });
+  else if (S.dF === 'week') data = data.filter(function(i) { return i.dateObj >= today && i.dateObj <= we; });
+  var list = document.getElementById('dashList');
+  if (!data.length) {
+    list.innerHTML = '<div class="empty"><div style="font-size:36px;margin-bottom:12px">📅</div><div style="font-size:16px;font-weight:600;color:var(--muted);margin-bottom:6px">No interviews scheduled</div><div style="font-size:13px;color:var(--dim)">Schedule requests from the Queue to see them here</div></div>';
+    return;
+  }
+  list.innerHTML = data.map(function(inv) {
+    var d = new Date(inv.dateObj);
+    var mc = inv.mode === 'Virtual' ? 'chip-v' : inv.mode === 'Phone' ? 'chip-p' : 'chip-o';
+    return '<div class="dcard"><div class="ddate"><div class="ddate-mon">' + d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase() + '</div><div class="ddate-day">' + d.getDate() + '</div></div>' +
+      '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px">' + inv.candidate + '</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:7px">' + inv.role + ' \xb7 ' + inv.intName + '</div>' +
+      '<div class="chip-row"><span class="chip ' + mc + '">' + inv.mode + '</span><span class="chip">' + inv.stage + '</span><span class="chip">' + inv.recruiter + '</span></div></div>' +
+      '<div style="flex-shrink:0;text-align:right"><div style="background:var(--teal-light);color:var(--navy);font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;margin-bottom:5px">Scheduled</div>' +
+      '<div style="font-size:12px;color:var(--muted)">' + (inv.slot || 'TBD') + '</div></div></div>';
+  }).join('');
+}
+
+function setDF(btn, f) {
+  S.dF = f;
+  document.querySelectorAll('#vDash .fbtn').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on'); renderDash();
+}
+
+// ─ Reports ────────────────────────────────────────────────────────
+function setRP(btn, p) {
+  S.rpPeriod = p;
+  document.querySelectorAll('.rrow:nth-child(2) .rpill').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on'); renderRpt();
+}
+function setRV(btn, v) {
+  S.rpView = v;
+  document.querySelectorAll('.rrow:nth-child(3) .rpill').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on');
+  var rfRow = document.getElementById('roleFilterRow');
+  if (rfRow) rfRow.style.display = v === 'role' ? 'flex' : 'none';
+  renderRpt();
+}
+
+function renderRpt() {
+  var prev = document.getElementById('rptPrev');
+  if (!S.scheduled.length) { prev.innerHTML = '<div style="text-align:center;padding:40px;color:var(--dim)">No scheduled interviews yet \u2014 schedule from the Queue to generate reports</div>'; return; }
+
+  // 1. Apply period filter
+  var now = new Date(); now.setHours(0,0,0,0);
+  var data = S.scheduled.filter(function(i) {
+    var d = new Date(i.dateObj); d.setHours(0,0,0,0);
+    if (S.rpPeriod === 'week') { var we = new Date(now); we.setDate(we.getDate()+7); return d >= now && d <= we; }
+    if (S.rpPeriod === 'month') { return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }
+    return true; // all time
+  });
+
+  // 2. Populate role dropdown from full dataset (not filtered)
+  var roleFilter = document.getElementById('roleFilter');
+  if (roleFilter) {
+    var allRoles = [];
+    S.scheduled.forEach(function(i) { if (allRoles.indexOf(i.role) === -1) allRoles.push(i.role); });
+    var saved = roleFilter.value;
+    roleFilter.innerHTML = '<option value="">All Roles</option>' + allRoles.sort().map(function(r) {
+      return '<option value="' + r + '"' + (saved === r ? ' selected' : '') + '>' + r + '</option>';
+    }).join('');
+  }
+
+  // 3. Apply role filter if on role view
+  var selectedRole = (roleFilter && S.rpView === 'role') ? roleFilter.value : '';
+  if (selectedRole) data = data.filter(function(i) { return i.role === selectedRole; });
+
+  var periodLabel = S.rpPeriod === 'week' ? 'This Week' : S.rpPeriod === 'month' ? 'This Month' : 'All Time';
+  var total = data.length;
+  var depts = {}; var recs = {}; var roles = {};
+  data.forEach(function(i) {
+    depts[i.department] = (depts[i.department] || 0) + 1;
+    recs[i.recruiter] = (recs[i.recruiter] || 0) + 1;
+    roles[i.role] = (roles[i.role] || 0) + 1;
+  });
+
+  if (!total) {
+    prev.innerHTML = '<div style="text-align:center;padding:40px;color:var(--dim)">No interviews found for the selected filters</div>';
+    return;
+  }
+
+  var html = '<div class="rpt-hd"><div class="rpt-title">Interview Report</div>' +
+    '<div class="rpt-sub">' + periodLabel + (selectedRole ? ' \xb7 ' + selectedRole : '') + ' \xb7 ' + total + ' interview' + (total !== 1 ? 's' : '') + '</div></div>' +
+    '<div class="rpt-stats">' +
+    '<div class="rpt-stat"><div class="rpt-stat-num">' + total + '</div><div class="rpt-stat-lbl">Interviews</div></div>' +
+    '<div class="rpt-stat"><div class="rpt-stat-num">' + Object.keys(depts).length + '</div><div class="rpt-stat-lbl">Departments</div></div>' +
+    '<div class="rpt-stat"><div class="rpt-stat-num">' + Object.keys(recs).length + '</div><div class="rpt-stat-lbl">Recruiters</div></div></div>';
+
+  if (S.rpView === 'summary' || S.rpView === 'dept') {
+    html += '<div class="rsec"><div class="rsec-title">By Department</div>' +
+      Object.entries(depts).sort(function(a,b){return b[1]-a[1];}).map(function(e) {
+        return '<div class="rbar-row"><span class="rbar-lbl">' + e[0] + '</span><div class="rbar-wrap"><div class="rbar" style="width:' + Math.round(e[1]/total*100) + '%"></div></div><span class="rbar-val">' + e[1] + '</span></div>';
+      }).join('') + '</div>';
+  }
+  if (S.rpView === 'summary' || S.rpView === 'rec') {
+    html += '<div class="rsec"><div class="rsec-title">By Recruiter</div>' +
+      Object.entries(recs).sort(function(a,b){return b[1]-a[1];}).map(function(e) {
+        return '<div class="rbar-row"><span class="rbar-lbl">' + e[0] + '</span><div class="rbar-wrap"><div class="rbar" style="width:' + Math.round(e[1]/total*100) + '%"></div></div><span class="rbar-val">' + e[1] + '</span></div>';
+      }).join('') + '</div>';
+  }
+  if (S.rpView === 'role') {
+    html += '<div class="rsec"><div class="rsec-title">By Role' + (selectedRole ? ' \u2014 ' + selectedRole : '') + '</div>' +
+      Object.entries(roles).sort(function(a,b){return b[1]-a[1];}).map(function(e) {
+        return '<div class="rbar-row"><span class="rbar-lbl">' + e[0] + '</span><div class="rbar-wrap"><div class="rbar" style="width:' + Math.round(e[1]/total*100) + '%"></div></div><span class="rbar-val">' + e[1] + '</span></div>';
+      }).join('') + '</div>';
+    if (selectedRole) {
+      html += '<div class="rsec"><div class="rsec-title">Interviews for ' + selectedRole + '</div>' +
+        data.map(function(inv) {
+          var d = new Date(inv.dateObj);
+          return '<div class="rbar-row"><span class="rbar-lbl">' + inv.candidate + '</span>' +
+            '<span style="flex:1;font-size:13px;color:var(--muted)">' + inv.intName + ' \xb7 ' + inv.stage + '</span>' +
+            '<span style="font-size:12px;color:var(--navy);font-weight:600">' + d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + '</span></div>';
+        }).join('') + '</div>';
+    }
+  }
+  html += '<div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn btn-ghost" onclick="window.print()">Print / Save as PDF</button></div>';
+  prev.innerHTML = html;
+}
+
+// ─ Historic ───────────────────────────────────────────────────────
+function renderHist() {
+  autoArchive();
+  var search = (document.getElementById('histSearch') ? document.getElementById('histSearch').value.toLowerCase() : '');
+  var data = S.historic.filter(function(t) {
+    if (!search) return true;
+    return (t.candidate + t.jobTitle + t.recruiter + t.department).toLowerCase().indexOf(search) !== -1;
+  });
+  var list = document.getElementById('histList');
+  if (!data.length) {
+    list.innerHTML = '<div class="empty"><div style="font-size:36px;margin-bottom:12px">🗂</div>' +
+      '<div style="font-size:16px;font-weight:600;color:var(--muted);margin-bottom:6px">' + (S.historic.length ? 'No matches' : 'No historic interviews yet') + '</div>' +
+      '<div style="font-size:13px;color:var(--dim)">' + (S.historic.length ? 'Try a different search' : 'Past scheduled interviews will appear here automatically') + '</div></div>';
+    return;
+  }
+  list.innerHTML = data.map(function(t) {
+    return '<div class="tcard" style="cursor:default">' +
+      '<div><div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">' + t.candidate + ' — ' + t.jobTitle + '</div>' +
+      '<div style="font-size:13px;color:var(--muted);margin-bottom:8px">' + t.recruiter + ' · ' + t.submitted + '</div>' +
+      '<div class="chip-row"><span class="chip">' + t.interviews.length + ' interview' + (t.interviews.length !== 1 ? 's' : '') + '</span>' +
+      t.interviews.map(function(inv) { return '<span class="chip">' + inv.name + '</span>'; }).join('') + '</div></div>' +
+      '<div style="flex-shrink:0"><span style="background:#F4F4F5;color:var(--dim);font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px">Historic</span></div></div>';
+  }).join('');
+}
+
+
+// ─ Firebase Functions ─────────────────────────────────────────────
+window.signInWithGoogle = function() {
+  var fb = window._fb;
+  if (!fb) { alert('Firebase not loaded yet, please wait.'); return; }
+  fb.signInWithRedirect(fb.auth, fb.provider);
+};
+
+window.doSignOut = function() {
+  if (confirm('Sign out of Locked In.?')) {
+    window._fb.signOut(window._fb.auth);
+  }
+};
+
+window.loadQueueFromFirestore = function() {
+  var fb = window._fb;
+  if (!fb) return;
+  var q = fb.query(fb.collection(fb.db, 'tickets'), fb.orderBy('submittedAt', 'desc'));
+  fb.onSnapshot(q, function(snapshot) {
+    S.queue = [];
+    S.scheduled = [];
+    snapshot.forEach(function(docSnap) {
+      var ticket = docSnap.data();
+      ticket._docId = docSnap.id;
+      if (ticket.status === 'scheduled') {
+        S.scheduled.push(ticket);
+      } else {
+        S.queue.push(ticket);
+      }
+    });
+    updBadge();
+    if (S.coordTab === 'queue') renderQueue();
+    if (S.coordTab === 'dash') renderDash();
+  });
+};
+
+window.saveTicketToFirestore = async function(ticket) {
+  var fb = window._fb;
+  if (!fb) return ticket;
+  ticket.submittedAt = Date.now();
+  ticket.teamId = window._fbUser ? window._fbUser.uid : 'default';
+  var docRef = await fb.addDoc(fb.collection(fb.db, 'tickets'), ticket);
+  ticket._docId = docRef.id;
+  return ticket;
+};
+
+window.updateTicketInFirestore = async function(docId, updates) {
+  var fb = window._fb;
+  if (!fb || !docId) return;
+  await fb.updateDoc(fb.doc(fb.db, 'tickets', docId), updates);
+};
+
+// Init
+S.config = loadConfig();
+applyConfig();
+addInt();
+
+// Sample dashboard data
+var sampleDates = [0,0,1,1,2,3,4,5];
+function dFrom(n){var d=new Date();d.setDate(d.getDate()+n);return d;}
+S.scheduled = [
+  {candidate:'Jordan Taylor',role:'Senior Product Manager',intName:'Hiring Manager Interview',stage:'Hiring Manager Interview',duration:'45 minutes',mode:'Virtual',recruiter:'Ari Benezra',department:'Product',interviewers:['Dana Lee'],slot:'10:00 AM – 10:45 AM',dateObj:dFrom(0)},
+  {candidate:'Jordan Taylor',role:'Senior Product Manager',intName:'Team Interview',stage:'Team Interview',duration:'60 minutes',mode:'Virtual',recruiter:'Ari Benezra',department:'Product',interviewers:['Chris Park','Riley West'],slot:'2:00 PM – 3:00 PM',dateObj:dFrom(1)},
+  {candidate:'Priya Nair',role:'Data Scientist',intName:'Technical Interview',stage:'Technical Interview',duration:'60 minutes',mode:'Virtual',recruiter:'Ari Benezra',department:'Data',interviewers:['Sam Rivera'],slot:'11:00 AM – 12:00 PM',dateObj:dFrom(0)},
+  {candidate:'Marcus Bell',role:'Software Engineer',intName:'Phone Screen',stage:'Phone Screen',duration:'30 minutes',mode:'Phone',recruiter:'Ari Benezra',department:'Engineering',interviewers:['Ari Benezra'],slot:'9:00 AM – 9:30 AM',dateObj:dFrom(1)},
+  {candidate:'Alex Patel',role:'Product Designer',intName:'Final Round',stage:'Final Round',duration:'90 minutes',mode:'Onsite',recruiter:'Ari Benezra',department:'Design',interviewers:['Dana Lee','Chris Park','Blake Davis'],slot:'1:00 PM – 2:30 PM',dateObj:dFrom(2)},
+  {candidate:'Nina Torres',role:'Marketing Manager',intName:'Hiring Manager Interview',stage:'Hiring Manager Interview',duration:'45 minutes',mode:'Virtual',recruiter:'Ari Benezra',department:'Marketing',interviewers:['Jamie Brooks'],slot:'3:00 PM – 3:45 PM',dateObj:dFrom(3)},
+];
+renderRpt();
+</script>
+</div><!-- /appShell -->
+</body>
+</html>
